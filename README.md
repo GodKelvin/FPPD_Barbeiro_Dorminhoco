@@ -21,9 +21,9 @@ Seu codigo final NAO DEVE IMPRIMIR NENHUM DEBUG, ou seja, comentem suas linhas d
 
 exemplo:
 
-./barbeiros 1 5 10
-barbeiro 0 atendeu 10 clientes
+./barbeiros 1 5 10<br>
+barbeiro 0 atendeu 10 clientes<br>
 
-./barbeiros 2 5 10
-barbeiro 0 atendeu 15 clientes
-barbeiro 1 atendeu 10 clientes
+./barbeiros 2 5 10<br>
+barbeiro 0 atendeu 15 clientes<br>
+barbeiro 1 atendeu 10 clientes<br>
