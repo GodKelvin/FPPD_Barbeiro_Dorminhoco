@@ -164,10 +164,33 @@ void *cortar_cabelo(void* cliente)
     return NULL;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    pthread_t clientes[n_clientes], barbeiros[n_barbeiros];
-    int id_clientes[n_clientes], id_barbeiros[n_barbeiros];
+    if(argc <= 3)
+    {
+        printf("Favor informar a quantidade de barbeiros e suas cadeiras,\n");
+        printf("a quantidade de cadeiras de espera para clientes, \n");
+        printf("a quantidade de trabalho minimo de cada barbeiro.\n");
+
+        return 0;
+    }
+    int qtd_barbeiros_cadeiras = atoi(argv[1]);
+    int qtd_cadeiras_espera = atoi(argv[2]);
+    int qtd_trabalho_minimo = atoi(argv[3]);
+
+    /*--Alocando memoria para o array de barbeiros--*/
+    Barbeiro *barbeiros;
+    barbeiros = malloc(sizeof(Barbeiro) * qtd_barbeiros_cadeiras);
+    if(barbeiros == NULL)
+    {
+        printf("ERRO AO CONTRATAR BARBEIROS\n");
+        return 0;
+    }
+
+    /*--CRIANDO OS SEMAFOROS--*/
+
+    //pthread_t clientes[n_clientes], barbeiros[n_barbeiros];
+    //int id_clientes[n_clientes], id_barbeiros[n_barbeiros];
 
     
     /*-Iniciando os semaforos-*/
