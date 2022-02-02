@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <unistd.h>
 
 typedef struct Barbeiro Barbeiro;
 typedef struct Cliente Cliente;
@@ -80,23 +81,6 @@ struct Barbeiro
     /*Array que identifica que o cabelo foi cortado*/
     sem_t *sem_cabelo_cortado;
 };
-
-// #define n_clientes 15
-// #define n_barbeiros 2
-// #define n_cadeiras 5
-
-// sem_t sem_cad_espera;
-// sem_t sem_cad_barbeiro[n_barbeiros];
-// sem_t sem_cabelo_cortado[n_barbeiros];
-// sem_t sem_cliente_cadeira[n_barbeiros];
-
-// /*Semaforos utilizados para saber qual barbeiro foi acordado
-// e por consequencia, atendendo*/
-// sem_t sem_escreve_nome_identificador, sem_le_nome_identificador;
-
-// //Identificacao do barbeiro que esta cortando o cabelo
-// int identificador_barbeiro;
-
 
 int barbearia_aberta(int *trabalho_barbeiros, int qtd_barbeiros)
 {
@@ -321,55 +305,43 @@ int main(int argc, char *argv[])
         cliente->sem_cliente_cadeira = sem_cliente_cadeira;
         cliente->sem_cabelo_cortado = sem_cabelo_cortado;
 
+
+        //COMO RESOLVER PROBLEMA DE THREAD MAX?
         if(pthread_create(&cliente->id_thread_cliente, NULL, cortar_cabelo, &cliente[0]) != 0)
         {
             printf("ERROR AO CRIER CLIENTE: %d\n", id_cliente);
             printf("NUMERO DE THREADS NO LINUX ATINGIU O TAMANHO MAXIMO\n!");
+            //sleep(5);
             return 0;
         }
+
+        if(id_cliente > 30000) sleep(2);
         id_cliente++;
     }
 
 
-    //pthread_t clientes[n_clientes], barbeiros[n_barbeiros];
-    //int id_clientes[n_clientes], id_barbeiros[n_barbeiros];
+    /*--RESULTADOS DO EXPEDIENTE DOS BARBEIROS--*/
+    for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
+    {
+        printf("barbeiro %d atendeu %d clientes\n", barbeiros[i].id, barbeiros[i].qtd_clientes_atendidos);
+    }
 
     
-    /*-Iniciando os semaforos-*/
 
-    //Quantidade de cadeiras disponiveis para espera
-    // sem_init(&sem_cad_espera, 0, 5);
+
+    free(barbeiros);
+    free(sem_cad_barbeiro);
+    free(sem_cabelo_cortado);
+    free(sem_cliente_cadeira);
+
+    sem_destroy(sem_cad_barbeiro);
+    sem_destroy(sem_cabelo_cortado);
+    sem_destroy(sem_cliente_cadeira);
+    sem_destroy(&sem_cad_espera);
+    sem_destroy(&sem_escreve_nome_identificador);
+    sem_destroy(&sem_le_nome_identificador);
     
-    // //Informar qual barbeiro vai atender
-    // sem_init(&sem_escreve_nome_identificador, 0, 1);
-
-    // //Identificar qual barbeiro esta cortando o cabelo
-    // sem_init(&sem_le_nome_identificador, 0, 0);
-
-    // for(int i = 0; i < n_barbeiros; i++)
-    // {
-    //     sem_init(&sem_cad_barbeiro[i], 0, 1);
-    //     sem_init(&sem_cliente_cadeira[i], 0, 0);
-    //     sem_init(&sem_cabelo_cortado[i], 0, 0);
-    // }
-
-    // for(int i = 0; i < n_clientes; i++)
-    // {
-    //     id_clientes[i] = i;
-    //     pthread_create(&clientes[i], NULL, cortar_cabelo, (void*)&id_clientes[i]);
-    // }
-
-    // for(int i = 0; i < n_barbeiros; i++)
-    // {
-    //     id_barbeiros[i] = i;
-    //     pthread_create(&barbeiros[i], NULL, barbeiro_trabalha, (void*)&id_barbeiros[i]);
-    // }
-
-    // for(int i = 0; i< n_clientes; i++)
-    // {
-    //     pthread_join(clientes[i], NULL);
-    // }
-
     printf("BORA PRA CASA SEUS CORNOS\n");
+
     return 0;
 }
