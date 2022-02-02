@@ -6,7 +6,6 @@
 
 typedef struct Barbeiro Barbeiro;
 typedef struct Cliente Cliente;
-typedef struct Barbearia Barbearia;
 
 
 
