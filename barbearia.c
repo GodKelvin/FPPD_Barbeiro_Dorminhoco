@@ -324,6 +324,7 @@ int main(int argc, char *argv[])
         if(pthread_create(&cliente->id_thread_cliente, NULL, cortar_cabelo, &cliente[0]) != 0)
         {
             printf("ERROR AO CRIER CLIENTE: %d\n", id_cliente);
+            printf("NUMERO DE THREADS NO LINUX ATINGIU O TAMANHO MAXIMO\n!");
             return 0;
         }
         id_cliente++;
