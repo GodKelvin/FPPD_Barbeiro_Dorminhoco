@@ -21,11 +21,11 @@ struct Cliente
 
     /*Para verificar se tem cadeiras disponiveis 
     na barbearia*/
-    sem_t *sem_cadeiras;
+    sem_t *sem_cad_espera;
 
     /*Para verificar qual o nome do barbeiro
     que foi acordado*/
-    sem_t *sem_le_nome_identificador
+    sem_t *sem_le_nome_identificador;
     
     /*Para informar que o barbeiro ja pode
     atender*/
@@ -41,8 +41,8 @@ struct Cliente
 
     /*Array que identifica a espera do barbeiro
     para realizar o corte*/
-    sem_t *sem_cabelo_cortado
-}
+    sem_t *sem_cabelo_cortado;
+};
 
 struct Barbeiro
 {
@@ -81,87 +81,111 @@ struct Barbeiro
     sem_t *sem_cabelo_cortado;
 };
 
-#define n_clientes 15
-#define n_barbeiros 2
-#define n_cadeiras 5
+// #define n_clientes 15
+// #define n_barbeiros 2
+// #define n_cadeiras 5
 
-sem_t sem_cadeiras;
-sem_t sem_cad_barbeiro[n_barbeiros];
-sem_t sem_cabelo_cortado[n_barbeiros];
-sem_t sem_cliente_cadeira[n_barbeiros];
+// sem_t sem_cad_espera;
+// sem_t sem_cad_barbeiro[n_barbeiros];
+// sem_t sem_cabelo_cortado[n_barbeiros];
+// sem_t sem_cliente_cadeira[n_barbeiros];
 
-/*Semaforos utilizados para saber qual barbeiro foi acordado
-e por consequencia, atendendo*/
-sem_t sem_escreve_nome_identificador, sem_le_nome_identificador;
+// /*Semaforos utilizados para saber qual barbeiro foi acordado
+// e por consequencia, atendendo*/
+// sem_t sem_escreve_nome_identificador, sem_le_nome_identificador;
 
-//Identificacao do barbeiro que esta cortando o cabelo
-int identificador_barbeiro;
+// //Identificacao do barbeiro que esta cortando o cabelo
+// int identificador_barbeiro;
+
+
+int barbearia_aberta(int *trabalho_barbeiros, int qtd_barbeiros)
+{
+    for(int i = 0; i < qtd_barbeiros; i++)
+    {
+        //Algum barbeiro ainda nao trabalhou o suficiente
+        if(trabalho_barbeiros[i] == 0) return 1; 
+    }
+    //Todos os barbeiros ja trabalharam o suficiente
+    return 0;
+}
 
 //Thread do barbeiro trabalhando (ou dormindo...)
 void *barbeiro_trabalha(void *arg)
 {
     //Converter para o ID do barbeiro?
-    int id = *(int*)arg;
+    //int id = *(int*)arg;
+    Barbeiro *barbeiro = (Barbeiro*) arg;
     while(1)
     {
         //Espera algum cliente o acordar
-        sem_wait(&sem_escreve_nome_identificador);
-        identificador_barbeiro = id;
+        sem_wait(barbeiro->sem_escreve_nome_identificador);
+        *(barbeiro->identificador_barbeiro) = barbeiro->id;
 
         //Informo ao cliente para vir cortar o cabelo
-        sem_post(&sem_le_nome_identificador);
+        sem_post(barbeiro->sem_le_nome_identificador);
 
         //Informo que o barbeiro X esta cortando cabelo
-        sem_wait(&sem_cliente_cadeira[id]);
+        sem_wait(&barbeiro->sem_cliente_cadeira[barbeiro->id]);
 
         //Informo que o barbeiro terminou de cortar o cabelo
-        sem_post(&sem_cabelo_cortado[id]);
+        sem_post(&barbeiro->sem_cabelo_cortado[barbeiro->id]);
+
+        //Incremento a quantidade de clientes atendidos
+        barbeiro->qtd_clientes_atendidos++;
+
+        //Verifico se esse barbeiro ja trabalhou o suficiente
+        if(barbeiro->qtd_clientes_atendidos >= barbeiro->qtd_min_atender)
+        {
+            /*Informo ao vetor de trabalho que este barbeiro
+            ja trabalhou o suficiente*/
+
+            //INSERIR VERIFCIAR DE BARBEARIA ABERTA?
+            barbeiro->trabalhos_barbeiro[barbeiro->id] = 1;
+        }
     }
 
     return NULL;
 }
 
 //Thread do cliente indo cortar o cabelo
-void *cortar_cabelo(void* cliente)
+void *cortar_cabelo(void* arg)
 {
-    int id = *(int*) cliente;
     int qual_cadeira;
-
-
+    Cliente *cliente = (Cliente*) arg;
     /*Verifico se tem vaga disponivel na barbearia,
     ou seja, se positivo, tem pelo menos uma cadeira disponivel
     para espera. O caso de sucesso eh quando tem barbeiro
     disponivel tambem*/
-    if(sem_trywait(&sem_cadeiras) == 0)
+    if(sem_trywait(cliente->sem_cad_espera) == 0)
     {
-        printf("Cliente conseguiu vaga: %d\n", id);
+        printf("Cliente conseguiu vaga: %d\n", cliente->id);
 
         //Verifica qual barbeiro estah dormindo
-        sem_wait(&sem_le_nome_identificador);
+        sem_wait(cliente->sem_le_nome_identificador);
 
         //Vai ate a cadeira do barbeiro que estava dormindo
-        qual_cadeira = identificador_barbeiro;
+        qual_cadeira = *(cliente->identificador_barbeiro);
         //printf("Cliente: %d, Barbeiro: %d\n", id, qual_cadeira);
 
         //Acorda o barbeiro para ser atendido
-        sem_post(&sem_escreve_nome_identificador);
+        sem_post(cliente->sem_escreve_nome_identificador);
 
         //Senta na cadeira do respectivo barbeiro
-        sem_wait(&sem_cad_barbeiro[qual_cadeira]);
+        sem_wait(&cliente->sem_cad_barbeiro[qual_cadeira]);
 
         //Informa que esta pronto para o corte
-        sem_post(&sem_cliente_cadeira[qual_cadeira]);
+        sem_post(&cliente->sem_cliente_cadeira[qual_cadeira]);
 
         //Informa que tem cadeiras disponiveis na fila de espera
-        sem_post(&sem_cadeiras);
+        sem_post(cliente->sem_cad_espera);
 
         //Espera o barbeiro realizar o corte
-        sem_wait(&sem_cabelo_cortado[qual_cadeira]);
+        sem_wait(&cliente->sem_cabelo_cortado[qual_cadeira]);
 
         //Depois do corte, saio da cadeiro do respectivo barbeiro
-        sem_post(&sem_cad_barbeiro[qual_cadeira]);
+        sem_post(&cliente->sem_cad_barbeiro[qual_cadeira]);
 
-        printf("Cliente %d saiu da barbearia\n", id);
+        printf("Cliente %d saiu da barbearia\n", cliente->id);
 
     }
     /*Nao tem cadeira disponivel e por consequencia,
@@ -200,7 +224,7 @@ int main(int argc, char *argv[])
     /*--CRIANDO OS SEMAFOROS--*/
 
     //Utilizado para verificar as cadeiras de espera
-    sem_t sem_cadeiras;
+    sem_t sem_cad_espera;
 
     /*Semaforos utilizados para saber qual barbeiro foi acordado
     e por consequencia, atendendo*/
@@ -222,7 +246,7 @@ int main(int argc, char *argv[])
 
     /*--INICIALIZANDO OS SEMAFOROS--*/
     //Quantidade de cadeiras disponiveis para espera
-    sem_init(&sem_cadeiras, 0, qtd_cadeiras_cliente);
+    sem_init(&sem_cad_espera, 0, qtd_cadeiras_espera);
     //Informar qual barbeiro vai atender
     sem_init(&sem_escreve_nome_identificador, 0, 1);
     //Identificar qual barbeiro esta cortando o cabelo
@@ -231,7 +255,7 @@ int main(int argc, char *argv[])
     for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
     {
         sem_init(&sem_cad_barbeiro[i], 0, 1);
-        sem_init(&sem_cliente_cadeira[i], 0, qtd_cadeiras_cliente);
+        sem_init(&sem_cliente_cadeira[i], 0, 0);
         sem_init(&sem_cabelo_cortado[i], 0, 0);
     }
 
@@ -239,27 +263,29 @@ int main(int argc, char *argv[])
     int trabalhos_barbeiro[qtd_barbeiros_cadeiras];
     int identificador_barbeiro;
 
-    if(qtd_min_atender < 1)
+    if(qtd_trabalho_minimo < 1)
     {
         //Entao todos ja realizaram o trabalho minimo(0x)
         for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
         {
-            trabalhar_barbeiro[i] = 1;
+            trabalhos_barbeiro[i] = 1;
         }
     }
     else
     {
         for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
         {
-            trabalhar_barbeiro[i] = 0;
+            trabalhos_barbeiro[i] = 0;
         }
     }
 
     /*--ASSOCIANDO AS ESTRUTURAS CRIADAS--*/
     for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
     {
+        
         barbeiros[i].id = i;
         barbeiros[i].qtd_clientes_atendidos = 0;
+        barbeiros[i].identificador_barbeiro = &identificador_barbeiro;
         barbeiros[i].qtd_min_atender = qtd_trabalho_minimo;
         //O ID do barbeiro eh a posicao no vetor de trabalho
         barbeiros[i].trabalhos_barbeiro = trabalhos_barbeiro;
@@ -268,6 +294,34 @@ int main(int argc, char *argv[])
         barbeiros[i].sem_cliente_cadeira = sem_cliente_cadeira;
         barbeiros[i].sem_cabelo_cortado = sem_cabelo_cortado;
 
+    }
+    /*-----CRIACAO DAS THREADS-----*/
+    /*--INICIANDO O EXPEDIENTE DOS BARBEIROS--*/
+    for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
+    {
+        if(pthread_create(&barbeiros[i].id_thread_barber, NULL, barbeiro_trabalha, &barbeiros[i]) != 0)
+        {
+            perror("Pthread Create Barbeiro Falhou\n");
+            return 0;
+        }
+    }
+
+    /*--ENQUANTO A BARBEARIA ESTIVER ABERTA,
+    ESTAH RECEBENDO CLIENTES--*/
+    int id_cliente = 0;
+    while(barbearia_aberta(trabalhos_barbeiro, qtd_barbeiros_cadeiras))
+    {
+        Cliente *cliente = (Cliente*) malloc(sizeof(Cliente));
+        cliente->id = id_cliente;
+        cliente->identificador_barbeiro = &identificador_barbeiro;
+        cliente->sem_cad_espera = &sem_cad_espera;
+        cliente->sem_le_nome_identificador = &sem_le_nome_identificador;
+        cliente->sem_escreve_nome_identificador = &sem_escreve_nome_identificador;
+        cliente->sem_cad_barbeiro = sem_cad_barbeiro;
+        cliente->sem_cliente_cadeira = sem_cliente_cadeira;
+        cliente->sem_cabelo_cortado = sem_cabelo_cortado;
+
+        id_cliente++;
     }
 
 
@@ -278,37 +332,37 @@ int main(int argc, char *argv[])
     /*-Iniciando os semaforos-*/
 
     //Quantidade de cadeiras disponiveis para espera
-    sem_init(&sem_cadeiras, 0, 5);
+    // sem_init(&sem_cad_espera, 0, 5);
     
-    //Informar qual barbeiro vai atender
-    sem_init(&sem_escreve_nome_identificador, 0, 1);
+    // //Informar qual barbeiro vai atender
+    // sem_init(&sem_escreve_nome_identificador, 0, 1);
 
-    //Identificar qual barbeiro esta cortando o cabelo
-    sem_init(&sem_le_nome_identificador, 0, 0);
+    // //Identificar qual barbeiro esta cortando o cabelo
+    // sem_init(&sem_le_nome_identificador, 0, 0);
 
-    for(int i = 0; i < n_barbeiros; i++)
-    {
-        sem_init(&sem_cad_barbeiro[i], 0, 1);
-        sem_init(&sem_cliente_cadeira[i], 0, 0);
-        sem_init(&sem_cabelo_cortado[i], 0, 0);
-    }
+    // for(int i = 0; i < n_barbeiros; i++)
+    // {
+    //     sem_init(&sem_cad_barbeiro[i], 0, 1);
+    //     sem_init(&sem_cliente_cadeira[i], 0, 0);
+    //     sem_init(&sem_cabelo_cortado[i], 0, 0);
+    // }
 
-    for(int i = 0; i < n_clientes; i++)
-    {
-        id_clientes[i] = i;
-        pthread_create(&clientes[i], NULL, cortar_cabelo, (void*)&id_clientes[i]);
-    }
+    // for(int i = 0; i < n_clientes; i++)
+    // {
+    //     id_clientes[i] = i;
+    //     pthread_create(&clientes[i], NULL, cortar_cabelo, (void*)&id_clientes[i]);
+    // }
 
-    for(int i = 0; i < n_barbeiros; i++)
-    {
-        id_barbeiros[i] = i;
-        pthread_create(&barbeiros[i], NULL, barbeiro_trabalha, (void*)&id_barbeiros[i]);
-    }
+    // for(int i = 0; i < n_barbeiros; i++)
+    // {
+    //     id_barbeiros[i] = i;
+    //     pthread_create(&barbeiros[i], NULL, barbeiro_trabalha, (void*)&id_barbeiros[i]);
+    // }
 
-    for(int i = 0; i< n_clientes; i++)
-    {
-        pthread_join(clientes[i], NULL);
-    }
+    // for(int i = 0; i< n_clientes; i++)
+    // {
+    //     pthread_join(clientes[i], NULL);
+    // }
 
     printf("BORA PRA CASA SEUS CORNOS\n");
     return 0;
