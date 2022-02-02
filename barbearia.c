@@ -58,6 +58,10 @@ struct Barbeiro
     atender antes de encerrar o expediente*/
     int qtd_min_atender;
 
+    /*Vetor compartilhado para verificar
+    se todo mundo ja atingiu o trabalho minimo*/
+    int *trabalhos_barbeiro;
+
     //Para identificar que foi acordado
     sem_t *sem_escreve_nome_identificador;
 
@@ -188,6 +192,37 @@ int main(int argc, char *argv[])
     }
 
     /*--CRIANDO OS SEMAFOROS--*/
+    sem_t sem_cadeiras;
+
+    //Array dada a quantidade de barbeiros
+    sem_t *sem_cad_barbeiro;
+
+    //Array dada a quantidade de barbeiros
+    sem_t *sem_cabelo_cortado;
+
+    //Array dada a quantidade de barbeiros
+    sem_t *sem_cliente_cadeira;
+
+    /*Semaforos utilizados para saber qual barbeiro foi acordado
+    e por consequencia, atendendo*/
+    sem_t sem_escreve_nome_identificador, sem_le_nome_identificador;
+
+    sem_cad_barbeiro = (sem_t*) malloc(sizeof(sem_t) * qtd_barbeiros_cadeiras);
+    sem_cabelo_cortado = (sem_t*) malloc(sizeof(sem_t) * qtd_barbeiros_cadeiras);
+    sem_cliente_cadeira = (sem_t*) malloc(sizeof(sem_t) * qtd_barbeiros_cadeiras);
+
+    /*--INICIALIZANDO OS SEMAFOROS--*/
+    sem_init(&sem_cadeiras);
+    sem_init(&sem_escreve_nome_identificador);
+    sem_init(&sem_le_nome_identificador);
+
+    for(int i = 0; i < n_barbeiros; i++)
+    {
+        sem_init(&sem_cad_barbeiro[i], 0, 1);
+        sem_init(&sem_cliente_cadeira[i], 0, 0);
+        sem_init(&sem_cabelo_cortado[i], 0, 0);
+    }
+
 
     //pthread_t clientes[n_clientes], barbeiros[n_barbeiros];
     //int id_clientes[n_clientes], id_barbeiros[n_barbeiros];
