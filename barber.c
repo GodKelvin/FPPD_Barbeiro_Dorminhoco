@@ -68,13 +68,14 @@ void *cortar_cabelo(void* cliente)
         sem_post(&sem_escreve_visor);
 
         //Senta na cadeira e aguarda o corte
-        sem_wait(&sem_cliente_cadeira([qual_cadeira]));
+        sem_wait(&sem_cliente_cadeira[qual_cadeira]);
 
         //Depois do corte, saio da cadeiro do respectivo barbeiro
         sem_post(&sem_cad_barbeiro[qual_cadeira]);
 
         printf("Cliente %d saiu da barbearia\n", id);
 
+        return NULL;
 
     }
     /*Nao tem cadeira disponivel e por consequencia,
@@ -89,6 +90,45 @@ void *cortar_cabelo(void* cliente)
 
 int main()
 {
-    printf("Hello Galaxy!\n");
+    pthread_t clientes[n_clientes], barbeiros[n_barbeiros];
+    int id_clientes[n_clientes], id_barbeiros[n_barbeiros];
+
+    
+    /*-Iniciando os semaforos-*/
+
+    //Quantidade de cadeiras disponiveis para espera
+    sem_init(&sem_cadeiras, 0, 5);
+    
+    //Informar qual barbeiro vai atender
+    sem_init(&sem_escreve_visor, 0, 1);
+
+    //Identificar qual barbeiro esta cortando o cabelo
+    sem_init(&sem_le_visor, 0, 0);
+
+    for(int i = 0; i < n_barbeiros; i++)
+    {
+        sem_init(&sem_cad_barbeiro[i], 0, 1);
+        sem_init(&sem_cliente_cadeira[i], 0, 0);
+        sem_init(&sem_cabelo_cortado[i], 0, 0);
+    }
+
+    for(int i = 0; i < n_clientes; i++)
+    {
+        id_clientes[i] = i;
+        pthread_create(&clientes[i], NULL, cortar_cabelo, (void*)&id_clientes[i]);
+    }
+
+    for(int i = 0; i < n_barbeiros; i++)
+    {
+        id_barbeiros[i] = i;
+        pthread_create(&barbeiros[i], NULL, barbeiro_trabalha, (void*)&id_barbeiros[i]);
+    }
+
+    for(int i = 0; i< n_clientes; i++)
+    {
+        pthread_join(clientes[i], NULL);
+    }
+
+    printf("BORA PRA CASA SEUS CORNOS\n");
     return 0;
 }
