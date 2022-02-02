@@ -62,20 +62,27 @@ void *cortar_cabelo(void* cliente)
 
         //Vai ate a cadeira do barbeiro que estava dormindo
         qual_cadeira = visor;
-        printf("Cliente: %d, Barbeiro: %d\n", id, qual_cadeira);
+        //printf("Cliente: %d, Barbeiro: %d\n", id, qual_cadeira);
 
         //Acorda o barbeiro para ser atendido
         sem_post(&sem_escreve_visor);
 
-        //Senta na cadeira e aguarda o corte
-        sem_wait(&sem_cliente_cadeira[qual_cadeira]);
+        //Senta na cadeira do respectivo barbeiro
+        sem_wait(&sem_cad_barbeiro[qual_cadeira]);
+
+        //Informa que esta pronto para o corte
+        sem_post(&sem_cliente_cadeira[qual_cadeira]);
+
+        //Informa que tem cadeiras disponiveis na fila de espera
+        sem_post(&sem_cadeiras);
+
+        //Espera o barbeiro realizar o corte
+        sem_wait(&sem_cabelo_cortado[qual_cadeira]);
 
         //Depois do corte, saio da cadeiro do respectivo barbeiro
         sem_post(&sem_cad_barbeiro[qual_cadeira]);
 
         printf("Cliente %d saiu da barbearia\n", id);
-
-        return NULL;
 
     }
     /*Nao tem cadeira disponivel e por consequencia,
@@ -84,8 +91,8 @@ void *cortar_cabelo(void* cliente)
     else
     {
         printf("SAINDO\n");
-        return NULL;
     }
+    return NULL;
 }
 
 int main()
