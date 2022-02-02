@@ -15,6 +15,10 @@ struct Cliente
     //ID Criado por mim
     int id;
 
+    /*Utiliza o ID do barbeiro para identificacao
+    do barbeiro quando ele for acordado*/
+    int *identificador_barbeiro;
+
     /*Para verificar se tem cadeiras disponiveis 
     na barbearia*/
     sem_t *sem_cadeiras;
@@ -46,10 +50,12 @@ struct Barbeiro
     pthread_t id_thread_barber;
 
 
-    /*ID Criado por mim, 
-    e tambem servira para identificacao
-    do barbeiro quando ele for acordado*/
+    //ID Criado por mim, 
     int id;
+
+    /*Utiliza o ID do barbeiro para identificacao
+    do barbeiro quando ele for acordado*/
+    int *identificador_barbeiro;
 
     //Armazenar quantos clientes o barbeiro atendeu
     int qtd_clientes_atendidos;
@@ -192,7 +198,14 @@ int main(int argc, char *argv[])
     }
 
     /*--CRIANDO OS SEMAFOROS--*/
+
+    //Utilizado para verificar as cadeiras de espera
     sem_t sem_cadeiras;
+
+    /*Semaforos utilizados para saber qual barbeiro foi acordado
+    e por consequencia, atendendo*/
+    sem_t sem_escreve_nome_identificador;
+    sem_t sem_le_nome_identificador;
 
     //Array dada a quantidade de barbeiros
     sem_t *sem_cad_barbeiro;
@@ -203,24 +216,58 @@ int main(int argc, char *argv[])
     //Array dada a quantidade de barbeiros
     sem_t *sem_cliente_cadeira;
 
-    /*Semaforos utilizados para saber qual barbeiro foi acordado
-    e por consequencia, atendendo*/
-    sem_t sem_escreve_nome_identificador, sem_le_nome_identificador;
-
     sem_cad_barbeiro = (sem_t*) malloc(sizeof(sem_t) * qtd_barbeiros_cadeiras);
     sem_cabelo_cortado = (sem_t*) malloc(sizeof(sem_t) * qtd_barbeiros_cadeiras);
     sem_cliente_cadeira = (sem_t*) malloc(sizeof(sem_t) * qtd_barbeiros_cadeiras);
 
     /*--INICIALIZANDO OS SEMAFOROS--*/
-    sem_init(&sem_cadeiras);
-    sem_init(&sem_escreve_nome_identificador);
-    sem_init(&sem_le_nome_identificador);
+    //Quantidade de cadeiras disponiveis para espera
+    sem_init(&sem_cadeiras, 0, qtd_cadeiras_cliente);
+    //Informar qual barbeiro vai atender
+    sem_init(&sem_escreve_nome_identificador, 0, 1);
+    //Identificar qual barbeiro esta cortando o cabelo
+    sem_init(&sem_le_nome_identificador, 0, 0);
 
-    for(int i = 0; i < n_barbeiros; i++)
+    for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
     {
         sem_init(&sem_cad_barbeiro[i], 0, 1);
-        sem_init(&sem_cliente_cadeira[i], 0, 0);
+        sem_init(&sem_cliente_cadeira[i], 0, qtd_cadeiras_cliente);
         sem_init(&sem_cabelo_cortado[i], 0, 0);
+    }
+
+    /*--CRIANDO O VETOR DE TRABALHO--*/
+    int trabalhos_barbeiro[qtd_barbeiros_cadeiras];
+    int identificador_barbeiro;
+
+    if(qtd_min_atender < 1)
+    {
+        //Entao todos ja realizaram o trabalho minimo(0x)
+        for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
+        {
+            trabalhar_barbeiro[i] = 1;
+        }
+    }
+    else
+    {
+        for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
+        {
+            trabalhar_barbeiro[i] = 0;
+        }
+    }
+
+    /*--ASSOCIANDO AS ESTRUTURAS CRIADAS--*/
+    for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
+    {
+        barbeiros[i].id = i;
+        barbeiros[i].qtd_clientes_atendidos = 0;
+        barbeiros[i].qtd_min_atender = qtd_trabalho_minimo;
+        //O ID do barbeiro eh a posicao no vetor de trabalho
+        barbeiros[i].trabalhos_barbeiro = trabalhos_barbeiro;
+        barbeiros[i].sem_escreve_nome_identificador = &sem_escreve_nome_identificador;
+        barbeiros[i].sem_le_nome_identificador = &sem_le_nome_identificador;
+        barbeiros[i].sem_cliente_cadeira = sem_cliente_cadeira;
+        barbeiros[i].sem_cabelo_cortado = sem_cabelo_cortado;
+
     }
 
 
