@@ -1,5 +1,8 @@
 # Os Barbeiros Dorminhocos
 
+## Para executar
+
+
 ## Descrição
 
 Na barbearia há N barbeiros, N cadeiras de barbeiro e X cadeiras para eventuais clientes
