@@ -13,10 +13,12 @@ sem_t sem_cad_barbeiro[n_barbeiros];
 sem_t sem_cabelo_cortado[n_barbeiros];
 sem_t sem_cliente_cadeira[n_barbeiros];
 
-sem_t sem_escreve_visor, sem_le_visor;
+/*Semaforos utilizados para saber qual barbeiro foi acordado
+e por consequencia, atendendo*/
+sem_t sem_escreve_nome_identificador, sem_le_nome_identificador;
 
 //Identificacao do barbeiro que esta cortando o cabelo
-int visor;
+int identificador_barbeiro;
 
 //Thread do barbeiro trabalhando (ou dormindo...)
 void *barbeiro_trabalha(void *arg)
@@ -26,11 +28,11 @@ void *barbeiro_trabalha(void *arg)
     while(1)
     {
         //Espera algum cliente o acordar
-        sem_wait(&sem_escreve_visor);
-        visor = id;
+        sem_wait(&sem_escreve_nome_identificador);
+        identificador_barbeiro = id;
 
         //Informo ao cliente para vir cortar o cabelo
-        sem_post(&sem_le_visor);
+        sem_post(&sem_le_nome_identificador);
 
         //Informo que o barbeiro X esta cortando cabelo
         sem_wait(&sem_cliente_cadeira[id]);
@@ -58,14 +60,14 @@ void *cortar_cabelo(void* cliente)
         printf("Cliente conseguiu vaga: %d\n", id);
 
         //Verifica qual barbeiro estah dormindo
-        sem_wait(&sem_le_visor);
+        sem_wait(&sem_le_nome_identificador);
 
         //Vai ate a cadeira do barbeiro que estava dormindo
-        qual_cadeira = visor;
+        qual_cadeira = identificador_barbeiro;
         //printf("Cliente: %d, Barbeiro: %d\n", id, qual_cadeira);
 
         //Acorda o barbeiro para ser atendido
-        sem_post(&sem_escreve_visor);
+        sem_post(&sem_escreve_nome_identificador);
 
         //Senta na cadeira do respectivo barbeiro
         sem_wait(&sem_cad_barbeiro[qual_cadeira]);
@@ -107,10 +109,10 @@ int main()
     sem_init(&sem_cadeiras, 0, 5);
     
     //Informar qual barbeiro vai atender
-    sem_init(&sem_escreve_visor, 0, 1);
+    sem_init(&sem_escreve_nome_identificador, 0, 1);
 
     //Identificar qual barbeiro esta cortando o cabelo
-    sem_init(&sem_le_visor, 0, 0);
+    sem_init(&sem_le_nome_identificador, 0, 0);
 
     for(int i = 0; i < n_barbeiros; i++)
     {
