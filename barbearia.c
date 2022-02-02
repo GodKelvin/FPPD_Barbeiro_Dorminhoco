@@ -321,6 +321,11 @@ int main(int argc, char *argv[])
         cliente->sem_cliente_cadeira = sem_cliente_cadeira;
         cliente->sem_cabelo_cortado = sem_cabelo_cortado;
 
+        if(pthread_create(&cliente->id_thread_cliente, NULL, cortar_cabelo, &cliente[0]) != 0)
+        {
+            printf("ERROR AO CRIER CLIENTE: %d\n", id_cliente);
+            return 0;
+        }
         id_cliente++;
     }
 
