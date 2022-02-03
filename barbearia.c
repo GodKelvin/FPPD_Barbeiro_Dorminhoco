@@ -142,7 +142,7 @@ void *cortar_cabelo(void* arg)
     disponivel tambem*/
     if(sem_trywait(cliente->sem_cad_espera) == 0)
     {
-        printf("Cliente conseguiu vaga: %d\n", cliente->id);
+        //printf("Cliente conseguiu vaga: %d\n", cliente->id);
 
         //Verifica qual barbeiro estah dormindo
         sem_wait(cliente->sem_le_nome_identificador);
@@ -169,17 +169,17 @@ void *cortar_cabelo(void* arg)
         //Depois do corte, saio da cadeiro do respectivo barbeiro
         sem_post(&cliente->sem_cad_barbeiro[qual_cadeira]);
 
-        printf("Cliente %d saiu da barbearia\n", cliente->id);
-
+        //printf("Cliente %d saiu da barbearia\n", cliente->id);
+        return NULL;
     }
     /*Nao tem cadeira disponivel e por consequencia,
     tambem nao tem barbeiro disponivel,
     e o cliente sai da barbearia*/
     else
     {
-        printf("SAINDO\n");
+        //printf("SAINDO\n");
+        return NULL;
     }
-    return NULL;
 }
 
 int main(int argc, char *argv[])
@@ -293,8 +293,14 @@ int main(int argc, char *argv[])
     /*--ENQUANTO A BARBEARIA ESTIVER ABERTA,
     ESTAH RECEBENDO CLIENTES--*/
     int id_cliente = 0;
+
+    //Numero maximo de threads permitido no linux
+    int qtd_t_clientes = 30000;
+    Cliente *clientes;
+    clientes = malloc(sizeof(Cliente) * qtd_t_clientes);
     while(barbearia_aberta(trabalhos_barbeiro, qtd_barbeiros_cadeiras))
     {
+        /*
         Cliente *cliente = (Cliente*) malloc(sizeof(Cliente));
         cliente->id = id_cliente;
         cliente->identificador_barbeiro = &identificador_barbeiro;
@@ -304,20 +310,65 @@ int main(int argc, char *argv[])
         cliente->sem_cad_barbeiro = sem_cad_barbeiro;
         cliente->sem_cliente_cadeira = sem_cliente_cadeira;
         cliente->sem_cabelo_cortado = sem_cabelo_cortado;
+        */
+        //clientes[id_cliente] = (Cliente*) malloc(sizeof(Cliente));
+        clientes[id_cliente].id = id_cliente;
+        clientes[id_cliente].identificador_barbeiro = &identificador_barbeiro;
+        clientes[id_cliente].sem_cad_espera = &sem_cad_espera;
+        clientes[id_cliente].sem_le_nome_identificador = &sem_le_nome_identificador;
+        clientes[id_cliente].sem_escreve_nome_identificador = &sem_escreve_nome_identificador;
+        clientes[id_cliente].sem_cad_barbeiro = sem_cad_barbeiro;
+        clientes[id_cliente].sem_cliente_cadeira = sem_cliente_cadeira;
+        clientes[id_cliente].sem_cabelo_cortado = sem_cabelo_cortado;
 
 
         //COMO RESOLVER PROBLEMA DE THREAD MAX?
-        if(pthread_create(&cliente->id_thread_cliente, NULL, cortar_cabelo, &cliente[0]) != 0)
+        if(pthread_create(&clientes[id_cliente].id_thread_cliente, NULL, cortar_cabelo, &clientes[id_cliente]) != 0)
         {
             printf("ERROR AO CRIER CLIENTE: %d\n", id_cliente);
             printf("NUMERO DE THREADS NO LINUX ATINGIU O TAMANHO MAXIMO\n!");
+
+            /*
+            for(int i = 0; i < id_cliente; i++)
+            {
+                printf("AGUARDANDO CLIENTEs\n");
+                pthread_join(clientes[id_cliente].id_thread_cliente, NULL);
+            }
+
+            printf("FIM CLIENTES\n");
+            free(clientes);
+            clientes = NULL;
+            clientes = malloc(sizeof(Cliente) * qtd_t_clientes);
+            id_cliente = 0;
             //sleep(5);
-            return 0;
+            //return 0;
+            */
         }
 
-        if(id_cliente > 30000) sleep(2);
+        
         id_cliente++;
+        /*
+        if(id_cliente >= qtd_t_clientes) 
+        {
+            for(int i = 0; i < qtd_t_clientes; i++)
+            {
+                pthread_join(clientes[id_cliente].id_thread_cliente, NULL);
+            }
+            //sleep(3); 
+            id_cliente = 0;
+        }
+        */
     }
+
+
+    //Aguardar os barbeiros encerrarem os expediente?
+    /*
+    for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
+    {
+        pthread_join(barbeiros[i].id_thread_barber, NULL);
+    }
+    */
+    
 
 
     /*--RESULTADOS DO EXPEDIENTE DOS BARBEIROS--*/
@@ -330,6 +381,7 @@ int main(int argc, char *argv[])
 
 
     free(barbeiros);
+    free(clientes);
     free(sem_cad_barbeiro);
     free(sem_cabelo_cortado);
     free(sem_cliente_cadeira);
@@ -340,8 +392,6 @@ int main(int argc, char *argv[])
     sem_destroy(&sem_cad_espera);
     sem_destroy(&sem_escreve_nome_identificador);
     sem_destroy(&sem_le_nome_identificador);
-    
-    printf("BORA PRA CASA SEUS CORNOS\n");
 
     return 0;
 }
