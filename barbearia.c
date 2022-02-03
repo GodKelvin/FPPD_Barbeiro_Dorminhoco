@@ -54,6 +54,11 @@ struct Barbeiro
     //ID Criado por mim, 
     int id;
 
+    /*Quantidade de barbeiros na biblioteca.
+    Necessario saber pois os barbeiros trabalham
+    enquanto todos nao tiverem atendido o minimo*/
+    int colegas_trabalho;
+
     /*Utiliza o ID do barbeiro para identificacao
     do barbeiro quando ele for acordado*/
     int *identificador_barbeiro;
@@ -99,6 +104,7 @@ void *barbeiro_trabalha(void *arg)
     //Converter para o ID do barbeiro?
     //int id = *(int*)arg;
     Barbeiro *barbeiro = (Barbeiro*) arg;
+    //while(barbearia_aberta(barbeiro->trabalhos_barbeiro, barbeiro->colegas_trabalho))
     while(1)
     {
         //Espera algum cliente o acordar
@@ -268,6 +274,7 @@ int main(int argc, char *argv[])
     {
         
         barbeiros[i].id = i;
+        barbeiros[i].colegas_trabalho = qtd_barbeiros_cadeiras;
         barbeiros[i].qtd_clientes_atendidos = 0;
         barbeiros[i].identificador_barbeiro = &identificador_barbeiro;
         barbeiros[i].qtd_min_atender = qtd_trabalho_minimo;
@@ -294,13 +301,11 @@ int main(int argc, char *argv[])
     ESTAH RECEBENDO CLIENTES--*/
     int id_cliente = 0;
 
-    //Numero maximo de threads permitido no linux
-    int qtd_t_clientes = 30000;
-    Cliente *clientes;
-    clientes = malloc(sizeof(Cliente) * qtd_t_clientes);
+
+
     while(barbearia_aberta(trabalhos_barbeiro, qtd_barbeiros_cadeiras))
     {
-        /*
+        
         Cliente *cliente = (Cliente*) malloc(sizeof(Cliente));
         cliente->id = id_cliente;
         cliente->identificador_barbeiro = &identificador_barbeiro;
@@ -310,58 +315,22 @@ int main(int argc, char *argv[])
         cliente->sem_cad_barbeiro = sem_cad_barbeiro;
         cliente->sem_cliente_cadeira = sem_cliente_cadeira;
         cliente->sem_cabelo_cortado = sem_cabelo_cortado;
-        */
-        //clientes[id_cliente] = (Cliente*) malloc(sizeof(Cliente));
-        clientes[id_cliente].id = id_cliente;
-        clientes[id_cliente].identificador_barbeiro = &identificador_barbeiro;
-        clientes[id_cliente].sem_cad_espera = &sem_cad_espera;
-        clientes[id_cliente].sem_le_nome_identificador = &sem_le_nome_identificador;
-        clientes[id_cliente].sem_escreve_nome_identificador = &sem_escreve_nome_identificador;
-        clientes[id_cliente].sem_cad_barbeiro = sem_cad_barbeiro;
-        clientes[id_cliente].sem_cliente_cadeira = sem_cliente_cadeira;
-        clientes[id_cliente].sem_cabelo_cortado = sem_cabelo_cortado;
-
 
         //COMO RESOLVER PROBLEMA DE THREAD MAX?
-        if(pthread_create(&clientes[id_cliente].id_thread_cliente, NULL, cortar_cabelo, &clientes[id_cliente]) != 0)
+        /*Devido a configuracao de kernel do linux, o numero maximo de threads
+        permitido eh de aproximadamente 32 mil. Caso o programa simplesmente
+        se encerre do nada, tente executa-lo com valores menores*/
+        if(pthread_create(&cliente->id_thread_cliente, NULL, cortar_cabelo, &cliente[0]) != 0)
         {
-            printf("ERROR AO CRIER CLIENTE: %d\n", id_cliente);
+            printf("ERROR AO CRIAR CLIENTE: %d\n", id_cliente);
             printf("NUMERO DE THREADS NO LINUX ATINGIU O TAMANHO MAXIMO\n!");
-
-            /*
-            for(int i = 0; i < id_cliente; i++)
-            {
-                printf("AGUARDANDO CLIENTEs\n");
-                pthread_join(clientes[id_cliente].id_thread_cliente, NULL);
-            }
-
-            printf("FIM CLIENTES\n");
-            free(clientes);
-            clientes = NULL;
-            clientes = malloc(sizeof(Cliente) * qtd_t_clientes);
-            id_cliente = 0;
-            //sleep(5);
-            //return 0;
-            */
+            break;
         }
-
-        
         id_cliente++;
-        /*
-        if(id_cliente >= qtd_t_clientes) 
-        {
-            for(int i = 0; i < qtd_t_clientes; i++)
-            {
-                pthread_join(clientes[id_cliente].id_thread_cliente, NULL);
-            }
-            //sleep(3); 
-            id_cliente = 0;
-        }
-        */
     }
 
 
-    //Aguardar os barbeiros encerrarem os expediente?
+    //Aguardar os barbeiros encerrarem os expediente
     /*
     for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
     {
@@ -377,11 +346,9 @@ int main(int argc, char *argv[])
         printf("barbeiro %d atendeu %d clientes\n", barbeiros[i].id, barbeiros[i].qtd_clientes_atendidos);
     }
 
-    
-
 
     free(barbeiros);
-    free(clientes);
+    //free(clientes);
     free(sem_cad_barbeiro);
     free(sem_cabelo_cortado);
     free(sem_cliente_cadeira);
