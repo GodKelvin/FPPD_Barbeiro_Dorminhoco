@@ -6,6 +6,13 @@ gcc -Wall -pedantic barbearia.c -pthread -o exec
 
 ## Para executar
 ./exec X Y Z
+
+## Exemplo
+./exec 1 1 1
+./exec 5 5 5
+./exec 10 10 10
+./exec 100 10 100
+./exec 20 5 500
 ./exec 100 2 50
 
 Sendo: Quantidade de barbeiros (e suas cadeiras), quantidade de cadeiras de espera para clientes e o trabalho mínimo dos barbeiros

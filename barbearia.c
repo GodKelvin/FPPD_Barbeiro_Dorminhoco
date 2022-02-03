@@ -12,7 +12,6 @@ struct Cliente
     //ID criado pela thread
     pthread_t id_thread_cliente;
 
-
     //ID Criado por mim
     int id;
 
@@ -49,7 +48,6 @@ struct Barbeiro
 {
     //ID Criado pela thread
     pthread_t id_thread_barber;
-
 
     //ID Criado por mim, 
     int id;
