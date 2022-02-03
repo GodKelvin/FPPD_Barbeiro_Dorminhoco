@@ -1,7 +1,14 @@
 # Os Barbeiros Dorminhocos
 
-## Para executar
 
+## Para Compilar
+gcc -Wall -pedantic barbearia.c -pthread -o exec
+
+## Para executar
+./exec X Y Z
+./exec 100 2 50
+
+Sendo: Quantidade de barbeiros (e suas cadeiras), quantidade de cadeiras de espera para clientes e o trabalho mínimo dos barbeiros
 
 ## Descrição
 

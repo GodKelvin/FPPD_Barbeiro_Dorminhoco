@@ -251,9 +251,10 @@ int main(int argc, char *argv[])
     int trabalhos_barbeiro[qtd_barbeiros_cadeiras];
     int identificador_barbeiro;
 
-    if(qtd_trabalho_minimo < 1)
+    if(qtd_trabalho_minimo < 1 || qtd_cadeiras_espera < 1)
     {
         //Entao todos ja realizaram o trabalho minimo(0x)
+        //Ou entao, a barbearia nao estah apta a receber nem um cliente.
         for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
         {
             trabalhos_barbeiro[i] = 1;
