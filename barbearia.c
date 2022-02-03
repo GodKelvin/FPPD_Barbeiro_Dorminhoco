@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
         {
             printf("ERROR AO CRIAR CLIENTE: %d\n", id_cliente);
             printf("NUMERO DE THREADS NO LINUX ATINGIU O TAMANHO MAXIMO\n!");
-            break;
+            return 0;
         }
         id_cliente++;
     }
