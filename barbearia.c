@@ -104,8 +104,8 @@ void *barbeiro_trabalha(void *arg)
     //Converter para o ID do barbeiro?
     //int id = *(int*)arg;
     Barbeiro *barbeiro = (Barbeiro*) arg;
-    //while(barbearia_aberta(barbeiro->trabalhos_barbeiro, barbeiro->colegas_trabalho))
-    while(1)
+    while(barbearia_aberta(barbeiro->trabalhos_barbeiro, barbeiro->colegas_trabalho))
+    //while(1)
     {
         //Espera algum cliente o acordar
         sem_wait(barbeiro->sem_escreve_nome_identificador);
@@ -128,8 +128,6 @@ void *barbeiro_trabalha(void *arg)
         {
             /*Informo ao vetor de trabalho que este barbeiro
             ja trabalhou o suficiente*/
-
-            //INSERIR VERIFCIAR DE BARBEARIA ABERTA?
             barbeiro->trabalhos_barbeiro[barbeiro->id] = 1;
         }
     }
@@ -329,23 +327,13 @@ int main(int argc, char *argv[])
         id_cliente++;
     }
 
-
-    //Aguardar os barbeiros encerrarem os expediente
-    /*
-    for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
-    {
-        pthread_join(barbeiros[i].id_thread_barber, NULL);
-    }
-    */
-    
-
-
     /*--RESULTADOS DO EXPEDIENTE DOS BARBEIROS--*/
     for(int i = 0; i < qtd_barbeiros_cadeiras; i++)
     {
         printf("barbeiro %d atendeu %d clientes\n", barbeiros[i].id, barbeiros[i].qtd_clientes_atendidos);
     }
 
+    /* Barbeiros morrem */
 
     free(barbeiros);
     //free(clientes);
