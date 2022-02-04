@@ -320,7 +320,17 @@ int main(int argc, char *argv[])
         if(pthread_create(&cliente->id_thread_cliente, NULL, cortar_cabelo, &cliente[0]) != 0)
         {
             printf("ERROR AO CRIAR CLIENTE: %d\n", id_cliente);
-            printf("NUMERO DE THREADS NO LINUX ATINGIU O TAMANHO MAXIMO\n!");
+            printf("NUMERO DE THREADS O TAMANHO MAXIMO!\n");
+            printf("-----\n");
+            printf("O numero maximo de threads suportado pelo kernel dos sistemas "); 
+            printf("operacionais 64 bits eh de cerca de 32 mil . Isto eh uma convencao, nao uma regra. ");
+            printf("Como eu crio threads clientes ate todos os barbeiros atingerem o trabalho minimo, ");
+            printf("pode acontecer de threads clientes terem sido criados mas outras anteriores ");
+            printf("ainda nao terminarem os seus respectivos processos (corte de cabelo/entrar e sair ");
+            printf("da barbearia) e por conta disso, o sistema encerra o programa para nao usarem ");
+            printf("uma quantidade enorme de recursos. Por favor, teste valores menores.\n");
+            printf("REFERENCIAS SOBRE ISSO: \n")/
+            printf("https://stackoverflow.com/questions/3419283/pthread-create-enomem-around-32000-threads");
             return 0;
         }
         id_cliente++;
