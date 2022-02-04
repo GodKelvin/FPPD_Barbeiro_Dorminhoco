@@ -19,7 +19,21 @@ Sendo: Quantidade de barbeiros (e suas cadeiras), quantidade de cadeiras de espe
 
 # Testes
 
-./exec 1 1 1
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
+![imagem_exec]()
 
 ## Descrição
 
