@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
             printf("da barbearia) e por conta disso, o sistema encerra o programa para nao usarem ");
             printf("uma quantidade enorme de recursos. Por favor, teste valores menores.\n");
             printf("REFERENCIAS SOBRE ISSO: \n");
-            printf("https://stackoverflow.com/questions/3419283/pthread-create-enomem-around-32000-threads");
+            printf("https://stackoverflow.com/questions/3419283/pthread-create-enomem-around-32000-threads\n");
             return 0;
         }
         id_cliente++;
