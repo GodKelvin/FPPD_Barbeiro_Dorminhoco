@@ -2,7 +2,7 @@
 
 
 ## Para Compilar
-gcc -Wall -pedantic barbearia.c -pthread -o exec
+gcc -Wall -pedantic barbearia.c barbearia.h main.c -pthread -o exec
 
 ## Para executar
 ./exec X Y Z
