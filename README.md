@@ -1,23 +1,39 @@
 # Os Barbeiros Dorminhocos
 
 
+## Resumo
+Trabalho realizado durante a disciplina de Fundamentos de Programação Paralela e Distribuída (2021/2), do curso Bacharelado em Sistemas de informação (BSI) do IFES-Campus Serra.
+
+## Docente da Disciplina
+Flávio Severiano Lamas
+
+## Assunto
+Sincronização de Threads sem cair em condições de disputa. 
+
 ## Para Compilar
+```
 gcc -Wall -pedantic barbearia.c barbearia.h main.c -pthread -o exec
+```
 
 ## Para executar
-./exec X Y Z
-
+```
+./exec N X Z
+```
+Sendo N Quantidade de barbeiros (e suas cadeiras), X quantidade de cadeiras de espera para clientes e Z o trabalho mínimo dos barbeiros.
 ## Exemplo
+```
 ./exec 1 1 1
 ./exec 5 5 5
 ./exec 10 10 10
 ./exec 100 10 100
 ./exec 20 5 500
 ./exec 100 2 50
+```
 
-Sendo: Quantidade de barbeiros (e suas cadeiras), quantidade de cadeiras de espera para clientes e o trabalho mínimo dos barbeiros
 
 # Testes
+
+A seguir, alguns testes utilizando diversos valores como entrada.
 
 ![imagem_exec](https://github.com/GodKelvin/FPPD_Barbeiro_Dorminhoco/blob/master/imagens_readme/teste_1.png)
 ![imagem_exec](https://github.com/GodKelvin/FPPD_Barbeiro_Dorminhoco/blob/master/imagens_readme/teste_10.png)

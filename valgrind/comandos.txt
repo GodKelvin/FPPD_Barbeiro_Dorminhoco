@@ -1,5 +1,0 @@
-//PARA COMPILAR
-gcc -Wall -pedantic -g -Og -std=gnu99 barbearia.c -pthread -o exec
-
-//PARA EXECUTAR
-valgrind --leak-check=full --track-origins=yes --log-file=valgrind_output.txt ./exec 1 1 10
