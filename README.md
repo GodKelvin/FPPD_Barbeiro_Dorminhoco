@@ -17,6 +17,10 @@ gcc -Wall -pedantic barbearia.c -pthread -o exec
 
 Sendo: Quantidade de barbeiros (e suas cadeiras), quantidade de cadeiras de espera para clientes e o trabalho mínimo dos barbeiros
 
+# Testes
+
+./exec 1 1 1
+
 ## Descrição
 
 Na barbearia há N barbeiros, N cadeiras de barbeiro e X cadeiras para eventuais clientes
