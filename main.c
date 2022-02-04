@@ -118,9 +118,6 @@ int main(int argc, char *argv[])
     /*--ENQUANTO A BARBEARIA ESTIVER ABERTA,
     ESTAH RECEBENDO CLIENTES--*/
     int id_cliente = 0;
-
-
-
     while(barbearia_aberta(trabalhos_barbeiro, qtd_barbeiros_cadeiras))
     {
         
