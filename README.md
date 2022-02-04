@@ -7,6 +7,9 @@ Trabalho realizado durante a disciplina de Fundamentos de Programação Paralela
 ## Docente da Disciplina
 Flávio Severiano Lamas
 
+## Aluno
+Kelvin Lehrback
+
 ## Assunto
 Sincronização de Threads sem cair em condições de disputa. 
 
