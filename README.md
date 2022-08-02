@@ -83,3 +83,6 @@ barbeiro 0 atendeu 10 clientes<br>
 ./barbeiros 2 5 10<br>
 barbeiro 0 atendeu 15 clientes<br>
 barbeiro 1 atendeu 10 clientes<br>
+
+## Nota
+De 0 a 100, a mesma recebeu nota 100.
